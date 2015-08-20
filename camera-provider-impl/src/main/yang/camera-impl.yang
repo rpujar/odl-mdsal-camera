@@ -1,0 +1,77 @@
+module camera-impl {
+    yang-version 1;
+    namespace "urn:opendaylight:params:xml:ns:yang:camera:impl";
+    prefix "camera-impl";
+
+    import config { prefix config; revision-date 2013-04-05; }
+    import opendaylight-md-sal-binding { prefix mdsal; revision-date 2013-10-28;}
+    import rpc-context { prefix rpcx; revision-date 2013-06-17; }
+
+    description
+        "Service definition for camera project";
+
+    revision "2014-12-10" {
+        description
+            "Initial revision";
+    }
+
+    identity camera {
+        base config:module-type;
+        config:java-name-prefix Camera;
+    }
+    
+    //Wires dependent services into this class - here BindingDataBroker registry service
+    augment "/config:modules/config:module/config:configuration" {
+        case camera {
+            when "/config:modules/config:module/config:type = 'camera'";
+            container broker {
+                uses config:service-ref {
+                    refine type {
+                        mandatory true;
+                        config:required-identity mdsal:binding-broker-osgi-registry;
+                    }
+                }
+            }
+            //Wires dependent services into this class - in this case the RPC registry service
+            container rpc-registry {
+                uses config:service-ref {
+                    refine type {
+                        mandatory true;
+                        config:required-identity mdsal:binding-rpc-registry;
+                    }
+                }
+            }
+            //Wires CameraProvider to Notification service
+            container notification-service {
+               uses config:service-ref {
+                   refine type {
+                       mandatory true;
+                       config:required-identity mdsal:binding-notification-service;
+                   }
+                }
+            }
+        }
+    }
+    augment "/config:modules/config:module/config:state" {
+        case camera {
+            when "/config:modules/config:module/config:type = 'camera'";
+            leaf photos-clicked {
+                type uint32;
+            }
+            rpcx:rpc-context-instance "clear-photos-clicked-rpc";
+        }
+    }
+    identity clear-photos-clicked-rpc;
+    rpc clear-photos-clicked-rpc  {
+        description
+          "JMX call to clear the photos-clicked counter.";
+
+        input {
+            uses rpcx:rpc-context-ref {
+                refine context-instance {
+                    rpcx:rpc-context-instance clear-photos-clicked-rpc;
+                }
+            }
+        }
+    }
+}

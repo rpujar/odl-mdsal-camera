@@ -1,0 +1,39 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!-- vi: set et smarttab sw=4 tabstop=4: -->
+<!--
+Copyright (c) Rashmi 2015
+
+This program and the accompanying materials are made available under the
+terms of the Eclipse Public License v1.0 which accompanies this distribution,
+and is available at http://www.eclipse.org/legal/epl-v10.html
+-->
+<features name="odl-camera-${project.version}" xmlns="http://karaf.apache.org/xmlns/features/v1.2.0"
+  xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+  xsi:schemaLocation="http://karaf.apache.org/xmlns/features/v1.2.0 http://karaf.apache.org/xmlns/features/v1.2.0">
+  <repository>mvn:org.opendaylight.yangtools/features-yangtools/${yangtools.version}/xml/features</repository>
+  <repository>mvn:org.opendaylight.controller/features-mdsal/${mdsal.version}/xml/features</repository>
+  <repository>mvn:org.opendaylight.controller/features-restconf/${mdsal.version}/xml/features</repository>
+  <repository>mvn:org.opendaylight.dlux/features-dlux/${dlux.version}/xml/features</repository>
+  <feature name='odl-camera-api' version='${project.version}' description='OpenDaylight :: camera :: api'>
+    <feature version='${yangtools.version}'>odl-yangtools-models</feature>
+    <bundle>mvn:org.opendaylight.camera/camera-api/${project.version}</bundle>
+  </feature>
+  <feature name='odl-camera' version='${project.version}' description='OpenDaylight :: camera'>
+    <feature version='${mdsal.version}'>odl-mdsal-broker</feature>
+    <feature version='${project.version}'>odl-camera-api</feature>
+    <bundle>mvn:org.opendaylight.camera/camera-impl/${project.version}</bundle>
+    <bundle>mvn:org.opendaylight.camera/camera-consumer/${project.version}</bundle>
+    <configfile finalname="${configfile.directory}/camera.xml">mvn:org.opendaylight.camera/camera-impl/${project.version}/xml/config</configfile>
+  </feature>
+  <feature name='odl-camera-rest' version='${project.version}' description='OpenDaylight :: camera :: REST'>
+    <feature version="${project.version}">odl-camera</feature>
+    <feature version="${mdsal.version}">odl-restconf</feature>
+  </feature>
+  <feature name='odl-camera-ui' version='${project.version}' description='OpenDaylight :: camera :: UI'>
+    <feature version="${project.version}">odl-camera-rest</feature>
+    <feature version="${mdsal.version}">odl-mdsal-apidocs</feature>
+    <feature version="${mdsal.version}">odl-mdsal-xsql</feature>
+    <feature version="${dlux.version}">odl-dlux-yangui</feature>
+  </feature>
+
+</features>

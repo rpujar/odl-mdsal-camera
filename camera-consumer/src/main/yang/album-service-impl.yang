@@ -1,0 +1,87 @@
+module album-service-impl {
+
+yang-version 1;
+    namespace "urn:opendaylight:params:xml:ns:yang:controller:config:album-service:impl";
+    prefix "album-service-impl";
+    
+    import config { prefix config; revision-date 2013-04-05; }
+    import rpc-context { prefix rpcx; revision-date 2013-06-17; }
+    import opendaylight-md-sal-binding { prefix mdsal; revision-date 2013-10-28; }
+
+    description
+        "This module contains the base YANG definitions for
+        album-service implementation.";
+
+    revision "2014-01-31" {
+        description
+            "Initial revision.";
+    }
+    
+    // This is the definition of album service interface identity.
+    // It will be used by the config subsystem to advertise the service instance
+    // provided by the album-service-impl module as an OSGI service
+    // with the AlbumService java interface.
+    // Since we didn't make a yang data model for the album, and we don't
+    // advertise the AlbumServiceImpl with the MD-SAL service registry,
+    // the only other way to access the AlbumService is by obtaining
+    // it via OSGI.
+    
+    identity album-service {
+     base "config:service-type";
+     // config:java-class property specifies the package path to AlbumService java interface
+     config:java-class "org.opendaylight.controller.album.api.AlbumService";
+    }
+    
+    // This is the definition of album service implementation module identity. 
+    identity album-service-impl {
+     base "config:module-type";
+     //refers to the album-service identity
+     config:provided-service album-service;
+     config:java-name-prefix AlbumService;
+    }
+    
+    augment "/config:modules/config:module/config:configuration" {
+        case album-service-impl {
+            when "/config:modules/config:module/config:type = 'album-service-impl'";
+            container rpc-registry {
+                uses config:service-ref {
+                    refine type {
+                        mandatory true;
+                        config:required-identity mdsal:binding-rpc-registry;
+                    }
+                }
+            }
+            container notification-service {
+               uses config:service-ref {
+                  refine type {
+                     mandatory true;
+                     config:required-identity mdsal:binding-notification-service;
+                  }
+               }
+            }
+        }
+    }
+    augment "/config:modules/config:module/config:state" {
+        case album-service-impl {
+            when "/config:modules/config:module/config:type = 'album-service-impl'";
+            rpcx:rpc-context-instance "make-matte-with-color-rpc";
+        }
+    }
+    identity make-matte-with-color-rpc;
+    rpc make-matte-with-color-rpc {
+         description "JMX call to make album with matte papertype and color photos";
+         input {
+          uses rpcx:rpc-context-ref {
+                refine context-instance {
+                rpcx:rpc-context-instance make-matte-with-color-rpc;
+                    }
+                }
+            }
+         output {
+                leaf result {
+                    type boolean;
+               }
+           }
+        }
+    }
+}
