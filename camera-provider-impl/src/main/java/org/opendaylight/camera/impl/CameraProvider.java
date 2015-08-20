@@ -105,7 +105,8 @@ CameraService, CameraRuntimeMXBean {
     }
 
     private void init() {
-        cameraDataChangeListener = new CameraDataChangeListener(db, this.status); //BAD should not be sending the status here, CHANGE TODO
+        cameraDataChangeListener = new CameraDataChangeListener(db, this.status); 
+        //To-Do: don't want to be sending the status here
 
     }
 
@@ -121,19 +122,19 @@ CameraService, CameraRuntimeMXBean {
     }
 
     @SuppressWarnings({ "unused", "rawtypes", "unchecked" })
-    private /*boolean*/void syncCameraParamWithDataStore(final LogicalDatastoreType store,
+    private void syncCameraParamWithDataStore(final LogicalDatastoreType store,
             InstanceIdentifier iid, final DataObject object) {
         WriteTransaction transaction = db.newWriteOnlyTransaction();
         transaction.put(store, iid, object);
-        // Perform the tx.submit asynchronously
+        //Perform the tx.submit asynchronously
         Futures.addCallback(transaction.submit(), new FutureCallback<Void>() {
             @Override
             public void onSuccess(final Void result) {
                 LOG.info("SyncStore {} with object {} succeeded", store, object);
-                //TODO RASHMI: notifyCallback(true);
+                //To-Do: notifyCallback(true);
             }
 
-            //          //TODO RASHMI:
+            //          //To-Do:
             //            private void notifyCallback(boolean b) {
             //                if (resultCallback != null) {
             //                    resultCallback.apply(b);
@@ -142,7 +143,7 @@ CameraService, CameraRuntimeMXBean {
             @Override
             public void onFailure(final Throwable throwable) {
                 LOG.error("SyncStore {} with object {} failed", store, object);
-                //                //TODO RASHMI: notifyCallback(false);
+                //                //To-Do: notifyCallback(false);
             }
         });
     }
@@ -250,11 +251,8 @@ CameraService, CameraRuntimeMXBean {
                             if(numberOfPhotosAvailable.get() == 0) {
                                 LOG.info("No more photos availble for clicking");
                                 notificationProvider.publish(new CameraOutOfPhotosBuilder().build());
-                                //From Gabriel's Code
                                 return Futures.immediateFailedCheckedFuture(
                                         new TransactionCommitFailedException("", clickNoMorePhotosError()));
-                                //Doesnt work: return Futures.immediateFuture(Rpcs.<TransactionStatus>getRpcResult(false,TransactionStatus.FAILED,));
-
                             }
                             LOG.info("Setting Camera status to On");
                             // We're not currently clicking photo - try to
@@ -357,8 +355,6 @@ CameraService, CameraRuntimeMXBean {
                 int bF=1;
                 if(CameraProvider.this.brightnessFactor!=null)
                     bF = CameraProvider.this.brightnessFactor.get();
-                //Check why it keeps looping here when the second operand is Null
-                //instead of throwing an exception when Exposure is Null
                 Thread.sleep(Math.abs(bF*(exposure + photoRequest.getExposure())));
             } catch (InterruptedException e) {
                 LOG.info("Interrupted while clicking photo");
@@ -374,12 +370,6 @@ CameraService, CameraRuntimeMXBean {
             syncCameraParamWithDataStore(LogicalDatastoreType.OPERATIONAL,
                     CAMERA_IID, buildCameraParams(CameraStatus.On));
 
-            // if(outOfPhoto()) {
-            // LOG.info( "Camera is out of memory to take photos!" );
-            // notificationProvider.publish( new
-            // ToasterOutOfBreadBuilder().build() );
-            // }
-
             // Set the Camera status back to off - this essentially releases the
             // photo clicking lock.
             // We can't clear the current click photo task nor set the Future
@@ -387,7 +377,7 @@ CameraService, CameraRuntimeMXBean {
             // update has been committed so we pass a callback to be notified on
             // completion.
 
-            //TODO RASHMI:  Instead of Sleep here, add a callback to syncCameraParamWithDataStore
+            //To-Do:  Instead of Sleep here, add a callback to syncCameraParamWithDataStore
             //to return a boolean to let you know about the completion of click-photo,
             //if true then only reset the CameraStatus to off
             Thread.sleep(10);
@@ -460,6 +450,5 @@ CameraService, CameraRuntimeMXBean {
         }
 
         return Futures.immediateFuture( RpcResultBuilder.<Void> success().build() );
-        //DEPRECATED-NotificationProviderService: CameraRestocked restockedNotif = new CameraRestockedBuilder().setNumberOfPhotos(input.getAmountOfPhotosToStock()).build();
     }
 }
