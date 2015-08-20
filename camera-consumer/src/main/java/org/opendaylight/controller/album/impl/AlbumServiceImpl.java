@@ -51,10 +51,6 @@ public class AlbumServiceImpl implements AlbumService, AutoCloseable, BindingAwa
     @Override
     public void onSessionInitialized(ConsumerContext session) {
         this.dataBroker =  session.getSALService(DataBroker.class);
-        //listeners = new HashMap<String, ListenerRegistration<DataChangeListener>>();
-        //ListenerRegistration<DataChangeListener> cupDataChangeListener = dataBroker.registerDataChangeListener(
-        //        LogicalDatastoreType.CONFIGURATION, getCupIid() , this, DataChangeScope.SUBTREE);
-        //listeners.put("butler", cupDataChangeListener);
 
     }
 
@@ -114,21 +110,6 @@ public class AlbumServiceImpl implements AlbumService, AutoCloseable, BindingAwa
         }
         ClickPhotoInput clickPhotoInput = new ClickPhotoInputBuilder().setExposure(exposure).setPhotoType(photoType).build();
         return camera.clickPhoto(clickPhotoInput);
-//        ClickPhotoInput clickPhotoInput = new ClickPhotoInputBuilder().setExposure(exposure).setPhotoType(photoType).build();
-//        Future<RpcResult<Void>> clickResult = camera.clickPhoto(clickPhotoInput);
-//        try {
-//            RpcResult<Void> result = clickResult.get();
-//            if(result.isSuccessful()) {
-//                log.info("clickPhoto from AlbumService succeeded");
-//                return clickResult;
-//            } else {
-//                log.info("Out of photos but we can make a default album,checking  flag-" +cameraOutOfPhotos);
-//                return Futures.immediateFuture(RpcResultBuilder.<Void> success().withWarning(ErrorType.APPLICATION, "partial operation", "Out of photos but we can make a default album").build());
-//            }
-//        } catch(InterruptedException | ExecutionException e ) {
-//            log.info( "An error occurred while clicking photo: " + e );
-//        }
-//        return clickResult; //don't return null
     }
 
     @Override
